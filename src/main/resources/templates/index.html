@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<th:block th:fragment="jsimportFragment">
+	<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+</th:block>
+
+<div class="content-wrapper">
+	<h1> Shortening URL Project </h1>
+
+	<div>
+		<input type="text" id="txt_longUrl" placeholder="url을 입력하세요.">
+	</div>
+	<div>
+		<button id="btn_conversion">변환</button>
+	</div>
+	<div>
+		<a id="txt_shortUrl" target="_blank"></a>
+	</div>
+
+</div>
+
+
+<script>
+
+	$('#btn_conversion').on('click', function(){
+		if($("#txt_longUrl").val().trim() !== "") {
+			requestShorteningUrl($('#txt_longUrl').val().trim());
+
+		} else {
+			alert("URL을 입력해 주세요.");
+		}
+	});
+
+	function checkUrl(url){
+		$.ajax({
+			url: "/check/url",
+			type: "POST",
+			dataType: "json",
+			data: reqeustBodyData(url),
+			contentType: "application/json; charset=utf-8",
+			success: function (returnVal) {
+				console.log(returnVal);
+				if (!returnVal.data) {
+					$('#txt_longUrl').val('');
+					$('#txt_shortUrl').val('');
+					alert("URL 값이 유효하지 않습니다.");
+				} else {
+					requestShorteningUrl(url);
+				}
+			},
+			error: function (e) {
+				alert(e);
+			}
+		});
+	}
+
+	function requestShorteningUrl(url){
+		$.ajax({
+			url: "/short/job",
+			type: "POST",
+			dataType: "json",
+			data: reqeustBodyData(url),
+			contentType: "application/json; charset=utf-8",
+			success: function (returnVal) {
+				console.log(returnVal);
+				if (returnVal.result == "OK") {
+					$("a#txt_shortUrl").text("127.0.0.1:8080/" + returnVal.data.shortUrl).prop("href", "http://127.0.0.1:8080/" + returnVal.data.shortUrl);
+				} else {
+					if(returnVal.status == "404"){
+						$('#txt_longUrl').val('');
+						$('#txt_shortUrl').val('');
+						alert("URL 값이 유효하지 않습니다.");
+					}
+				}
+			},
+			error: function (e) {
+				alert(e);
+			}
+		});
+	}
+
+	function reqeustBodyData(longUrl){
+		var params = {
+			"longUrl" : longUrl
+		}
+		return JSON.stringify(params);
+	}
+
+</script>
+
+</html>
