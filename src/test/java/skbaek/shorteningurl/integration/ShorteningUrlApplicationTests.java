@@ -43,8 +43,8 @@ class ShorteningUrlApplicationTests {
     @Autowired
     private TestRestTemplate restTemplate;
 
-//    @MockBean
-//    private ShorteningUrlRepository shorteningUrlRepository;
+    @MockBean
+    private ShorteningUrlRepository shorteningUrlRepository;
 
     @Autowired
     private ShorteningService shorteningService;
@@ -69,8 +69,8 @@ class ShorteningUrlApplicationTests {
     @Test
     public void getShorteningUrl() throws Exception {
         ShorteningUrl tmpData = generateShorteningUrl();
-//        shorteningUrlRepository.save(tmpData);
 
+        //mockMvc test
         mockMvc.perform(
                 post("/short/job")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -80,6 +80,7 @@ class ShorteningUrlApplicationTests {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
 
+        //TestRestTemplate test
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
 
@@ -90,12 +91,12 @@ class ShorteningUrlApplicationTests {
         then(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         then(response.getBody()).isNotNull();
 
+        //mockBean test
         ShorteningUrl shorteningUrl = shorteningService.detail(1L);
-        System.out.println("entity : " + shorteningUrl.toString());
-//        if(shorteningUrl.isPresent()){
-//            then("B").isEqualTo(shorteningUrl.get().getShortUrl());
-//            then(longUrl).isEqualTo(shorteningUrl.get().getLongUrl());
-//        }
+        if(shorteningUrl != null){
+            then("B").isEqualTo(shorteningUrl.getShortUrl());
+            then(longUrl).isEqualTo(shorteningUrl.getLongUrl());
+        }
 
     }
 
