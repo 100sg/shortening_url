@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns:th="http://www.thymeleaf.org">
 
 <th:block th:fragment="jsimportFragment">
 	<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+	<link rel="shortcut icon" href="#" />
 </th:block>
 
 <div class="content-wrapper">
@@ -33,30 +33,8 @@
 		}
 	});
 
-	function checkUrl(url){
-		$.ajax({
-			url: "/check/url",
-			type: "POST",
-			dataType: "json",
-			data: reqeustBodyData(url),
-			contentType: "application/json; charset=utf-8",
-			success: function (returnVal) {
-				console.log(returnVal);
-				if (!returnVal.data) {
-					$('#txt_longUrl').val('');
-					$('#txt_shortUrl').val('');
-					alert("URL 값이 유효하지 않습니다.");
-				} else {
-					requestShorteningUrl(url);
-				}
-			},
-			error: function (e) {
-				alert(e);
-			}
-		});
-	}
-
 	function requestShorteningUrl(url){
+		var SERVCIE_SERVCER = "http://localhost:8080/";
 		$.ajax({
 			url: "/short/job",
 			type: "POST",
@@ -66,7 +44,7 @@
 			success: function (returnVal) {
 				console.log(returnVal);
 				if (returnVal.result == "OK") {
-					$("a#txt_shortUrl").text("127.0.0.1:8080/" + returnVal.data.shortUrl).prop("href", "http://127.0.0.1:8080/" + returnVal.data.shortUrl);
+					$("a#txt_shortUrl").text(SERVCIE_SERVCER.concat(returnVal.data.shortUrl)).prop("href", SERVCIE_SERVCER.concat(returnVal.data.shortUrl));
 				} else {
 					if(returnVal.status == "404"){
 						$('#txt_longUrl').val('');

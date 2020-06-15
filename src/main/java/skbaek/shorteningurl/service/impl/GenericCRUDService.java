@@ -22,11 +22,7 @@ public class GenericCRUDService<T> implements CRUDService<T> {
     @Override
     public T detail(long id) throws Exception {
         Optional<T> find = this.repository.findById(id);
-        if(find.isPresent()){
-            return find.get();
-        } else {
-            throw new NoResultException("The requested id is no data");
-        }
+        return find.orElseThrow(() -> new NoResultException("The requested id is no data"));
     }
 
     @Override

@@ -3,6 +3,7 @@ package skbaek.shorteningurl.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import skbaek.shorteningurl.entity.ShorteningUrl;
 import skbaek.shorteningurl.repository.ShorteningUrlRepository;
 import skbaek.shorteningurl.util.Base62;
@@ -21,38 +22,27 @@ public class ShorteningService extends GenericCRUDService<ShorteningUrl> {
         super(repository);
     }
 
+    @Transactional
     public ShorteningUrl encodingToUrl(ShorteningUrl data) throws Exception {
         String longUrl = data.getLongUrl();
         ShorteningUrl shorteningUrl = null;
 
-        checkUrlConnection(longUrl);
+        checkConnectionUrl(longUrl);
 
-        if (longUrl.indexOf("http://") > -1) {
-            longUrl = longUrl.replaceAll("http://", "");
-        } else if (longUrl.indexOf("https://") > -1) {
-            longUrl = longUrl.replaceAll("https://", "");
-        }
+        String resultUrl = urlProcess(longUrl);
 
-        int strLength = longUrl.length();
-        if (longUrl.subSequence(strLength - 1, strLength).equals("/")) {
-            longUrl = longUrl.substring(0, strLength - 1);
-        }
+        ShorteningUrl findData = ((ShorteningUrlRepository) repository).findByLongUrl(resultUrl);
 
-        log.info("최종 url : {}", longUrl);
-        Optional<ShorteningUrl> su
-                = Optional.ofNullable(((ShorteningUrlRepository) repository).findByLongUrl(longUrl));
-        log.info("data : {}", data);
-
-        if (su.isPresent()) {
-            log.info("data msg : url exist !");
-            shorteningUrl = su.get();
+        if (findData != null) {
+            shorteningUrl = findData;
         } else {
             ShorteningUrl entity = new ShorteningUrl();
-            entity.setLongUrl(longUrl.trim());
+            entity.setLongUrl(resultUrl);
             entity.setShortUrl(Base62.encodeToLong(repository.count() + 1L));
             shorteningUrl = super.save(entity);
         }
 
+//        log.info("service : {}", shorteningUrl.toString());
         return shorteningUrl;
     }
 
@@ -68,19 +58,34 @@ public class ShorteningService extends GenericCRUDService<ShorteningUrl> {
         }
     }
 
-    public void checkUrlConnection(String longUrl) throws IOException {
-        boolean check = false;
+    private void checkConnectionUrl(String longUrl) throws Exception {
 
         URL tempUrl = new URL(longUrl);
         HttpURLConnection connection = (HttpURLConnection) tempUrl.openConnection();
         connection.setRequestProperty("User-Agent", "Mozilla/4.0");
         connection.connect();
 
-        log.info("url response code : {}", connection.getResponseCode());
-        if (200 == connection.getResponseCode()) {
-            check = true;
+        if (404 == connection.getResponseCode()) {
+            throw new Exception(connection.getResponseCode()+"");
         }
 
     }
+
+    private String urlProcess(String longUrl) {
+        String result = null;
+        if (longUrl.indexOf("http://") > -1) {
+            result = longUrl.replaceAll("http://", "");
+        } else if (longUrl.indexOf("https://") > -1) {
+            result = longUrl.replaceAll("https://", "");
+        }
+
+        int strLength = result.length();
+        if (result.subSequence(strLength - 1, strLength).equals("/")) {
+            result = result.substring(0, strLength - 1);
+        }
+
+        return result;
+    }
+
 
 }

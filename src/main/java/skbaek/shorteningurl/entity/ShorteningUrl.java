@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Entity
 @Builder
 @Getter @Setter
-@Table
+@Table(name = "SHORTENING_URL")
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -18,7 +18,7 @@ public class ShorteningUrl implements Serializable {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
 
-    @Column(unique = true, columnDefinition = "not null")
+    @Column(unique = true)
     private String longUrl;
 
     @Column(unique = true)

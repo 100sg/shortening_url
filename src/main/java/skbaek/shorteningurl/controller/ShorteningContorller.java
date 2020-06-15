@@ -16,7 +16,6 @@ import java.net.URL;
 
 @Slf4j
 @RestController
-@RequestMapping
 public class ShorteningContorller {
 
     private ShorteningService shorteningService;
@@ -26,9 +25,8 @@ public class ShorteningContorller {
     }
 
     @PostMapping("/short/job")
-    public ResponseEntity shorteningUrl(@RequestBody ShorteningUrl param) {
+    public ResponseEntity getShorteningUrl(@RequestBody ShorteningUrl param) {
         ApiResponse<ShorteningUrl> res = new ApiResponse<>();
-        ApiResponse<Boolean> resFail = new ApiResponse<>();
 
         log.info("entity : {}", param.toString());
         try {
@@ -42,31 +40,7 @@ public class ShorteningContorller {
             res.setResult("FAIL");
             res.setStatus(e.getMessage());
         }
-
-        return ResponseEntity.ok(res);
-    }
-
-    @PostMapping("/check/url")
-    public ResponseEntity checkUrl(@RequestBody ShorteningUrl param) {
-        log.info("check url : {}", param.toString());
-        ApiResponse<Boolean> res = new ApiResponse<>();
-        boolean check = false;
-
-        try {
-            URL tempUrl = new URL(param.getLongUrl());
-            HttpURLConnection connection = (HttpURLConnection) tempUrl.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/4.0");
-            connection.connect();
-
-            log.info("url response code : {}", connection.getResponseCode());
-            if (HttpStatus.OK.value() == connection.getResponseCode()) check = true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        res.setData(check);
-
+        log.info("controller check : {}",res);
         return ResponseEntity.ok(res);
     }
 
