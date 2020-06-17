@@ -1,4 +1,6 @@
 # ShorteningUrl Project 실행방법
+[![Build Status](https://travis-ci.com/100sg/shortening_url.svg?branch=master)](https://travis-ci.com/100sg/shortening_url)
+
 > Linux Java 설치
 
 * linux> java -version (자바설치 유뮤 확인)
